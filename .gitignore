@@ -1,0 +1,12 @@
+# Ignore Python virtual environment
+env/
+
+# Ignore data files
+*.npy
+
+# Ignore masks
+*.nii.gz
+
+# Ignore cache
+__pycache__/
+

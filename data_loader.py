@@ -12,8 +12,8 @@ def get_data(mask_path=None):
         use_mask = False
     feat_base = '/projectnb/fastfmri/sdwilli/scripts/FEAT/grouplevel/new_grouplevel/mumfordadvice'
     subj_lists = {
-        'nonresponder': '/projectnb/fastfmri/sdwilli/mood/grouplists/grps/nonresponder.txt',
-        'responder': '/projectnb/fastfmri/sdwilli/mood/grouplists/grps/responder.txt'
+        'nonresponder': '/home/mbosli/DeepMoodPredictor/data/grps/nonresponder.txt',
+        'responder': '/home/mbosli/DeepMoodPredictor/data/grps/responder.txt'
     }
 
     # === Load V1 mask ===

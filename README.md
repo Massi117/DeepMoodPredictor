@@ -1,3 +1,3 @@
 # DeepMoodPredictor
 
-### Uses Python 3.6.8
+### Uses Python 3.10.14

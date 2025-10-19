@@ -11,7 +11,6 @@ def get_data(mask_path=None):
     else:
         use_mask = False
     feat_base = '/orcd/data/ldlewis/001/om/sdwilli/forMassi/mumfordadvice'
-    #'/projectnb/fastfmri/sdwilli/scripts/FEAT/grouplevel/new_grouplevel/mumfordadvice'
     subj_lists = {
         'nonresponder': '/home/mbosli/DeepMoodPredictor/data/grps/nonresponder.txt',
         'responder': '/home/mbosli/DeepMoodPredictor/data/grps/responder.txt'

@@ -1,7 +1,7 @@
 # Ignore Python virtual environment
 env/
 
-# Ignore data files
+# Ignore large data files
 *.npy
 
 # Ignore masks

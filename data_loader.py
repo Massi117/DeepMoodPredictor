@@ -53,7 +53,9 @@ def get_data(mask_path=None):
             try:
                 cope_data = nib.load(cope_path).get_fdata()
                 if use_mask:
-                    voxels = cope_data[mask_indices]
+                    filter_mat = np.zeros_like(cope_data, dtype=bool)
+                    filter_mat[mask_indices] = True
+                    voxels = np.where(filter_mat, cope_data, 0)
                 else:
                     voxels = cope_data
                 idx = mdd_codes.index(code)
@@ -95,8 +97,8 @@ def get_data(mask_path=None):
 if __name__ == '__main__':
 
     # Load the data
-    X, X_flat, y, locs = get_data()
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42, shuffle=True)
+    X, X_flat, y, locs = get_data()#'/home/mbosli/DeepMoodPredictor/masks/MVP_rois/Thalumus_mask.nii.gz')
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42, shuffle=True)
 
     # Split the y_data after split
     y_train_c = []
@@ -121,7 +123,7 @@ if __name__ == '__main__':
     np.save('data/y_TEST_RAW.npy', y_test_c)
 
     np.save('data/y_TEST_RAW_REG.npy', y_test_r)
-    np.save('data/y_TRAIN_RAW.npy', y_train_r)
+    np.save('data/y_TRAIN_RAW_REG.npy', y_train_r)
 
     # Save raw data
     np.save('data/X_RAW.npy', X)

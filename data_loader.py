@@ -10,7 +10,7 @@ def get_data(mask_path=None):
         use_mask = True
     else:
         use_mask = False
-    feat_base = '/orcd/data/ldlewis/001/om/sdwilli/forMassi/mumfordadvice'
+    feat_base = '/home/mbosli/DeepMoodPredictor/data/cope_data/forMassi/mumfordadvice'
     subj_lists = {
         'nonresponder': '/home/mbosli/DeepMoodPredictor/data/grps/nonresponder.txt',
         'responder': '/home/mbosli/DeepMoodPredictor/data/grps/responder.txt'
@@ -45,7 +45,7 @@ def get_data(mask_path=None):
         label = 1 if group == 'responder' else 0
         for code in codes:
             cope_path = os.path.join(
-                feat_base, group, f"m{code}.gfeat", "cope1.feat", "stats", "cope2.nii.gz"
+                feat_base, group, f"m{code}.gfeat", "cope1.feat", "stats", "cope_diff.nii.gz"
             )
             if not os.path.exists(cope_path):
                 print(f"Missing: {cope_path}")

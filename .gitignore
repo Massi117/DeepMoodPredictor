@@ -10,3 +10,6 @@ env/
 # Ignore cache
 __pycache__/
 
+# Ignore data folder
+data/
+

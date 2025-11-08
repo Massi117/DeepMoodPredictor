@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 def get_cope_diff():
 
     # === Paths ===
-    feat_base = '/orcd/data/ldlewis/001/om/sdwilli/forMassi/mumfordadvice'
+    feat_base = '/home/mbosli/DeepMoodPredictor/data/cope_data/forMassi/mumfordadvice'
     subj_lists = {
         'nonresponder': '/home/mbosli/DeepMoodPredictor/data/grps/nonresponder.txt',
         'responder': '/home/mbosli/DeepMoodPredictor/data/grps/responder.txt'

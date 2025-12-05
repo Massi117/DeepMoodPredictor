@@ -159,8 +159,8 @@ if __name__ == '__main__':
 
     # Load the data
     print('Loading data...')
-    X, X_flat, y, locs = get_data_parsed('/home/mbosli/DeepMoodPredictor/masks/MVP_rois/amygdalaR_thr50_2mm.nii.gz')
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, shuffle=True)
+    X, X_flat, y, locs = get_data_parsed('/home/mbosli/DeepMoodPredictor/masks/MVP_rois/Thalamus_mask.nii.gz')
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42, shuffle=True)
 
     # Split the y_data after split
     print('Splitting the data...')

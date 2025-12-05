@@ -9,4 +9,4 @@ def get_out_shape(x, y, z, padding, dialation, size, stride):
 
     return (x_out, y_out, z_out)
 
-print(get_out_shape(11, 14, 11, 0, 1, 3, 2))
+print(get_out_shape(10, 7, 8, 0, 1, 3, 2))

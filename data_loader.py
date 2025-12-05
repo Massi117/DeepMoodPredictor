@@ -98,7 +98,7 @@ if __name__ == '__main__':
 
     # Load the data
     X, X_flat, y, locs = get_data()#'/home/mbosli/DeepMoodPredictor/masks/MVP_rois/Thalumus_mask.nii.gz')
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42, shuffle=True)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42, shuffle=True)
 
     # Split the y_data after split
     y_train_c = []

@@ -13,3 +13,5 @@ __pycache__/
 # Ignore data folder
 data/
 
+# Ignore figure folder
+figures/

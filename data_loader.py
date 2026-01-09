@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import nibabel as nib
-from sklearn.model_selection import train_test_split
+import datamanager
 
 def get_data(mask_path=None):
 
@@ -92,40 +92,13 @@ def get_data(mask_path=None):
 
     return X, flattened, y, all_indices
 
-
-
 # Driver
 if __name__ == '__main__':
 
     # Load the data
-    X, X_flat, y, locs = get_data()#'/home/mbosli/DeepMoodPredictor/masks/MVP_rois/Thalumus_mask.nii.gz')
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42, shuffle=True)
+    X, y = datamanager.load_data(cope_type='cope_diff')
 
-    # Split the y_data after split
-    y_train_c = []
-    y_train_r = []
-
-    for sublist in y_train:
-        y_train_c.append(sublist[0])
-        y_train_r.append(sublist[1])
-
-    y_test_c = []
-    y_test_r = []
-
-    for sublist in y_test:
-        y_test_c.append(sublist[0])
-        y_test_r.append(sublist[1])
-
-
-    # Save split raw data
-    np.save('data/X_TRAIN_RAW.npy', X_train)
-    np.save('data/y_TRAIN_RAW.npy', y_train_c)
-    np.save('data/X_TEST_RAW.npy', X_test)
-    np.save('data/y_TEST_RAW.npy', y_test_c)
-
-    np.save('data/y_TEST_RAW_REG.npy', y_test_r)
-    np.save('data/y_TRAIN_RAW_REG.npy', y_train_r)
-
-    # Save raw data
-    np.save('data/X_RAW.npy', X)
-    np.save('data/y_RAW.npy', y) 
+    # Create train-test split
+    print("Creating train-test split...")
+    datamanager.create_train_test_split(X, y, test_size=0.05)
+    print("Done.")

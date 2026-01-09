@@ -7,6 +7,7 @@ import torchvision.transforms as transforms
 
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+import nibabel as nib
 
 from models import MoodCNNClassifier
 from datasets import COPEDataset
@@ -17,6 +18,10 @@ if __name__ == "__main__":
 
     # Load the data
     X, y = datamanager.load_data(cope_type='cope_diff')
+
+    # Define image affine for saving saliency maps
+    img = nib.load('masks/MVP_rois/HarvardOxford-sub-maxprob-thr50-2mm.nii.gz')
+    affine_set = img.affine
 
     # Determine number of folds
     folds = len(y)
@@ -76,19 +81,21 @@ if __name__ == "__main__":
             input, label = input.cuda(), label.cuda()
             input = input.clone().detach().requires_grad_(True)
             output = model(input)
-            print(f"Raw output logits: {output.detach().cpu().numpy()[0]}")
-            pred = torch.argmin(outputs, dim=1) # Sign inversion for uknown reason
+            pred = torch.argmax(outputs, dim=1) # Sign inversion for uknown reason
             actual = torch.argmax(labels, dim=1)
 
-
-
+            # Saliency map computation
+            print("Computing saliency map...")
             score = output[0, actual]
             model.zero_grad()
             score.backward()
-
             saliency = input.grad.abs()
-            saliency = saliency[0, 0] 
+            saliency = saliency[0, 0].cpu()
 
+            # Save saliency map as NIfTI
+            saliency_nifti = nib.Nifti1Image(saliency.numpy(), affine=affine_set)
+            nib.save(saliency_nifti, f'masks/loo_saliency_sample_{i}.nii.gz')
+            print("Saliency map saved.")
 
 
             print(f'Predicted: {pred.item()}   True: {actual.item()}')

@@ -27,6 +27,10 @@ def load_data(cope_type='cope_diff', continuous_labels=False):
             11, 22, 4, 26, 8, 20, 23, 29, 3, 19, 21, 27, 6, 17, 26, 6, 24, 11, 19]
     mdd_change = [sd - wr for sd, wr in zip(mdd_sd, mdd_wr)]
 
+
+    mask_data = nib.load('masks/MVP_rois/ablation-thr50-2mm.nii.gz').get_fdata()
+    mask_indices = np.where(mask_data > 0)
+
     # === Load subjects ===
     def load_subjects(path):
         with open(path, 'r') as f:
@@ -52,6 +56,8 @@ def load_data(cope_type='cope_diff', continuous_labels=False):
             try:
                 cope_data = nib.load(cope_path).get_fdata()
                 voxels = cope_data
+                
+                voxels[mask_indices] = 0
                 idx = mdd_codes.index(code)
                 X.append(voxels)
                 mdd_change = mdd_wr[idx] - mdd_sd[idx]

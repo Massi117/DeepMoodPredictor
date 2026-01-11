@@ -112,7 +112,7 @@ if __name__ == "__main__":
     print(f"Validation Accuracy: {val_acc:.4f}")
 
     cm = confusion_matrix(actual_list, preds_list)
-    matrix = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['SD', 'WR'])
+    matrix = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['NR', 'R'])
     plt.title("Confusion Matrix")
     matrix.plot(cmap=plt.cm.Blues).figure_.savefig("figures/loo_confusion_matrix.png")
     plt.close()

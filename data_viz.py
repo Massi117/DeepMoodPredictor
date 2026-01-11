@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import nibabel as nib
 
 
 # Codes and scores (module scope so other functions can use them)
@@ -100,8 +101,25 @@ def find_codes_diff_from_value(mapping=None, target=7, min_diff=3):
     out = [int(code) for code, ch in mapping.items() if abs(ch - target) >= min_diff]
     return sorted(out)
 
+def save_cope_as_nifti(cope_data, affine, out_path):
+    """Save the given COPE data as a NIfTI file.
+
+    Args:
+        cope_data (np.ndarray): 3D array of COPE values.
+        out_path (str): Path to save the NIfTI file.
+    """
+    import nibabel as nib
+
+    # Create a NIfTI image
+    nifti_img = nib.Nifti1Image(cope_data, affine=affine)
+
+    # Save to the specified path
+    nib.save(nifti_img, out_path)
+    print(f"Saved COPE data to {out_path}")
+
 
 if __name__ == '__main__':
+    '''
     # Compute mapping and save arrays
     mapping, codes_arr, changes_arr = compute_mdd_change()
     out_dir = 'data'
@@ -122,5 +140,13 @@ if __name__ == '__main__':
     codes_diff = find_codes_diff_from_value(mapping=mapping, target=7, min_diff=7)
     print("Codes with |(wr-sd) - 7| >= 7:", codes_diff)
     np.save(os.path.join(out_dir, 'mdd_codes_diff_from_7.npy'), np.array(codes_diff, dtype=int))
+    '''
+    # Example of saving a COPE array as NIfTI
+    img = nib.load('masks/MVP_rois/HarvardOxford-sub-maxprob-thr50-2mm.nii.gz')
+    affine_set = img.affine
+    X_train = np.load('data/X_TRAIN_RAW.npy')
+    example_cope = X_train[0]  # Take the first training sample
+    print(example_cope.shape)
+    save_cope_as_nifti(example_cope, affine_set, out_path='masks/example_cope.nii.gz')
     
 	

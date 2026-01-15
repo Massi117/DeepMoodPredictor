@@ -123,9 +123,9 @@ def create_train_test_split(X, y, test_size=0.1, random_state=None):
 if __name__ == '__main__':
 
     # Load the data
-    X, y = datamanager.load_data(cope_type='cope_diff')
+    X, y = load_data(cope_type='cope_diff')
 
     # Create train-test split
     print("Creating train-test split...")
-    datamanager.create_train_test_split(X, y, test_size=0.05)
+    create_train_test_split(X, y, test_size=0.05)
     print("Done.")

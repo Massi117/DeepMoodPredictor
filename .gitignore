@@ -10,8 +10,7 @@ env/
 # Ignore cache
 __pycache__/
 
-# Ignore data folder
+# Ignore folders
 data/
-
-# Ignore figure folder
 figures/
+masks/

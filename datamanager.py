@@ -117,3 +117,15 @@ def create_train_test_split(X, y, test_size=0.1, random_state=None):
 
     #np.save('data/y_TEST_RAW_REG.npy', y_test_r)
     #np.save('data/y_TRAIN_RAW_REG.npy', y_train_r)
+
+
+# Driver
+if __name__ == '__main__':
+
+    # Load the data
+    X, y = datamanager.load_data(cope_type='cope_diff')
+
+    # Create train-test split
+    print("Creating train-test split...")
+    datamanager.create_train_test_split(X, y, test_size=0.05)
+    print("Done.")

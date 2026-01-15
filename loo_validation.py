@@ -3,7 +3,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torchvision.transforms as transforms
 
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
@@ -17,7 +16,7 @@ import datamanager
 if __name__ == "__main__":
 
     # Load the data
-    X, y = datamanager.load_data(cope_type='cope_diff')
+    X, y = datamanager.load_data(cope_type='cope_diff', mask_dir='masks/MVP_rois/amygdala-thr50-2mm.nii.gz')
 
     # Define image affine for saving saliency maps
     img = nib.load('masks/MVP_rois/HarvardOxford-sub-maxprob-thr50-2mm.nii.gz')
@@ -38,7 +37,7 @@ if __name__ == "__main__":
         y_val = y[i:i+1]
 
         # Convert to datasets
-        train_dataset = COPEDataset(X_train, y_train, augmentation=False)
+        train_dataset = COPEDataset(X_train, y_train)
         val_dataset = COPEDataset(X_val, y_val)
 
         # Define data loaders
@@ -81,7 +80,7 @@ if __name__ == "__main__":
             input, label = input.cuda(), label.cuda()
             input = input.clone().detach().requires_grad_(True)
             output = model(input)
-            pred = torch.argmax(outputs, dim=1) # Sign inversion for uknown reason
+            pred = torch.argmax(outputs, dim=1)
             actual = torch.argmax(labels, dim=1)
 
             # Saliency map computation
@@ -94,7 +93,7 @@ if __name__ == "__main__":
 
             # Save saliency map as NIfTI
             saliency_nifti = nib.Nifti1Image(saliency.numpy(), affine=affine_set)
-            nib.save(saliency_nifti, f'masks/loo_saliency_sample_{i}.nii.gz')
+            nib.save(saliency_nifti, f'masks/saliency_maps/loo_saliency_sample_{i}.nii.gz')
             print("Saliency map saved.")
 
 

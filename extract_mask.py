@@ -11,7 +11,6 @@ def extract_label_as_mask(input_path, target_label, output_path):
     img = nib.load(input_path)
     data = img.get_fdata()
     affine = img.affine
-    print(affine)
 
     # Create the binary mask
     final_mask = np.zeros(data.shape, dtype=np.uint8)   
@@ -29,7 +28,7 @@ def extract_label_as_mask(input_path, target_label, output_path):
 # Usage
 if __name__ == "__main__":
     input_nifti_path = 'masks/MVP_rois/HarvardOxford-sub-maxprob-thr50-2mm.nii.gz'
-    label_to_extract = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]  # Example label
-    output_mask_path = 'masks/MVP_rois/ablation-thr50-2mm.nii.gz'
+    label_to_extract = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21]  # Example label
+    output_mask_path = 'masks/MVP_rois/amygdala-thr50-2mm.nii.gz'
     
     extract_label_as_mask(input_nifti_path, label_to_extract, output_mask_path)

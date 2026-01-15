@@ -2,6 +2,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import nibabel as nib
+import nilearn.datasets
 
 
 # Codes and scores (module scope so other functions can use them)
@@ -141,12 +142,18 @@ if __name__ == '__main__':
     print("Codes with |(wr-sd) - 7| >= 7:", codes_diff)
     np.save(os.path.join(out_dir, 'mdd_codes_diff_from_7.npy'), np.array(codes_diff, dtype=int))
     '''
-    # Example of saving a COPE array as NIfTI
+    # Saving a COPE array as NIfTI
     img = nib.load('masks/MVP_rois/HarvardOxford-sub-maxprob-thr50-2mm.nii.gz')
     affine_set = img.affine
-    X_train = np.load('data/X_TRAIN_RAW.npy')
-    example_cope = X_train[0]  # Take the first training sample
+    X = np.load('data/X_RAW.npy')
+    example_cope = X[0]  # Take the first training sample
     print(example_cope.shape)
     save_cope_as_nifti(example_cope, affine_set, out_path='masks/example_cope.nii.gz')
+
+    # Print hout what area maps to each index in the Harvard-Oxford atlas
+    data = nilearn.datasets.fetch_atlas_harvard_oxford('cort-maxprob-thr50-2mm')
+    for idx, name in enumerate(data['labels']):
+        print(f"Index {idx}: {name}")
+    
     
 	

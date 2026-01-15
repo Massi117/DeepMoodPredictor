@@ -3,7 +3,7 @@ import numpy as np
 import nibabel as nib
 from sklearn.model_selection import train_test_split
 
-def load_data(cope_type='cope_diff', continuous_labels=False):
+def load_data(cope_type='cope_diff', continuous_labels=False, mask_dir=None):
     """Load COPE data for responders and non-responders.
     Args:
         cope_type (str): Type of COPE data to load ('cope_diff' or other).
@@ -27,9 +27,13 @@ def load_data(cope_type='cope_diff', continuous_labels=False):
             11, 22, 4, 26, 8, 20, 23, 29, 3, 19, 21, 27, 6, 17, 26, 6, 24, 11, 19]
     mdd_change = [sd - wr for sd, wr in zip(mdd_sd, mdd_wr)]
 
-
-    mask_data = nib.load('masks/MVP_rois/ablation-thr50-2mm.nii.gz').get_fdata()
-    mask_indices = np.where(mask_data > 0)
+    # Check if a mask is provided
+    if mask_dir is None:
+        use_mask = False
+    else:
+        use_mask = True
+        mask_data = nib.load(mask_dir).get_fdata()
+        mask_indices = np.where(mask_data > 0)
 
     # === Load subjects ===
     def load_subjects(path):
@@ -56,8 +60,8 @@ def load_data(cope_type='cope_diff', continuous_labels=False):
             try:
                 cope_data = nib.load(cope_path).get_fdata()
                 voxels = cope_data
-                
-                voxels[mask_indices] = 0
+                if use_mask:
+                    voxels[mask_indices] = 0
                 idx = mdd_codes.index(code)
                 X.append(voxels)
                 mdd_change = mdd_wr[idx] - mdd_sd[idx]
@@ -89,7 +93,7 @@ def load_data(cope_type='cope_diff', continuous_labels=False):
 
     return X, y
 
-def create_train_test_split(X, y, test_size=0.25, random_state=None):
+def create_train_test_split(X, y, test_size=0.1, random_state=None):
     """Split the data into training and testing sets.
     Args:
         X (np.ndarray): Voxelwise COPE data.
@@ -104,27 +108,12 @@ def create_train_test_split(X, y, test_size=0.25, random_state=None):
         X, y, test_size=test_size, random_state=random_state, shuffle=True
     )
 
-    # Split the y_data after split
-    y_train_c = []
-    y_train_r = []
-
-    for sublist in y_train:
-        y_train_c.append(sublist[0])
-        y_train_r.append(sublist[1])
-
-    y_test_c = []
-    y_test_r = []
-
-    for sublist in y_test:
-        y_test_c.append(sublist[0])
-        y_test_r.append(sublist[1])
-
 
     # Save split raw data
     np.save('data/X_TRAIN_RAW.npy', X_train)
-    np.save('data/y_TRAIN_RAW.npy', y_train_c)
+    np.save('data/y_TRAIN_RAW.npy', y_train)
     np.save('data/X_TEST_RAW.npy', X_test)
-    np.save('data/y_TEST_RAW.npy', y_test_c)
+    np.save('data/y_TEST_RAW.npy', y_test)
 
-    np.save('data/y_TEST_RAW_REG.npy', y_test_r)
-    np.save('data/y_TRAIN_RAW_REG.npy', y_train_r)
+    #np.save('data/y_TEST_RAW_REG.npy', y_test_r)
+    #np.save('data/y_TRAIN_RAW_REG.npy', y_train_r)

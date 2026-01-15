@@ -61,7 +61,7 @@ class MoodCNNClassifier(nn.Module):
         output_features = self.conv_layers(dummy_input)
         # Store the calculated size
         self._to_linear = output_features.view(output_features.size(0), -1).size(1)
-        print(f"Calculated flattened feature size: {self._to_linear}")
+        #print(f"Calculated flattened feature size: {self._to_linear}") # For debugging
 
     def forward(self, x):
         x = self.conv_layers(x)

@@ -42,7 +42,7 @@ class MoodCNNClassifier(nn.Module):
             nn.ReLU(),
             nn.Linear(1280, 256),
             nn.ReLU(),
-            #nn.Dropout(0.5),   # Optional dropout layer
+            #nn.Dropout(0.9),   # Optional dropout layer
             nn.Linear(256, 2),  # 2 output classes
             #nn.Softmax(dim=0)  # Optional softmax layer (not needed with CrossEntropyLoss)
         )

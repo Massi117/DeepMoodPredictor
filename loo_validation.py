@@ -16,7 +16,7 @@ import datamanager
 if __name__ == "__main__":
 
     # Load the data
-    X, y = datamanager.load_data(cope_type='cope_diff', mask_dir='masks/MVP_rois/amygdala-thr50-2mm.nii.gz')
+    X, y = datamanager.load_data(cope_type='cope_diff')#, mask_dir='masks/MVP_rois/limbic-thr50-2mm.nii.gz')
 
     # Define image affine for saving saliency maps
     img = nib.load('masks/MVP_rois/HarvardOxford-sub-maxprob-thr50-2mm.nii.gz')
@@ -41,10 +41,11 @@ if __name__ == "__main__":
         val_dataset = COPEDataset(X_val, y_val)
 
         # Define data loaders
-        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=1, shuffle=True)
+        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=1, shuffle=False)
         val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=1, shuffle=False)
 
         # Setup
+        torch.manual_seed(42)
         model = MoodCNNClassifier().cuda()
         optimizer = optim.RMSprop(model.parameters(), lr=1e-3)
         criterion = nn.CrossEntropyLoss()

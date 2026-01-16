@@ -8,6 +8,7 @@ def load_data(cope_type='cope_diff', continuous_labels=False, mask_dir=None):
     Args:
         cope_type (str): Type of COPE data to load ('cope_diff' or other).
         continuous_labels (bool): Whether to use continuous MDD change scores as labels.
+        mask_dir (str): Path to the mask NIfTI file. If None, no mask is applied.
     Returns:
         X (np.ndarray): Voxelwise COPE data.
         y (np.ndarray): Labels and MDD change scores."""
@@ -123,7 +124,7 @@ def create_train_test_split(X, y, test_size=0.1, random_state=None):
 if __name__ == '__main__':
 
     # Load the data
-    X, y = load_data(cope_type='cope_diff')
+    X, y = load_data(cope_type='cope_diff', mask_dir='masks/MVP_rois/MNI-maxprob-thr0-2mm.nii.gz')
 
     # Create train-test split
     print("Creating train-test split...")

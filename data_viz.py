@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import nibabel as nib
 import nilearn.datasets
+from scipy.ndimage import gaussian_filter
 
 
 # Codes and scores (module scope so other functions can use them)
@@ -119,6 +120,37 @@ def save_cope_as_nifti(cope_data, affine, out_path):
     print(f"Saved COPE data to {out_path}")
 
 
+def get_average_saliency_map(saliency_maps, sigma=None):
+    """Compute the average saliency map from a list of saliency maps.
+
+    Args:
+        saliency_maps directory to 3D saliency maps.
+    Returns:
+        np.ndarray: The average saliency map.
+    """
+    if not saliency_maps:
+        raise ValueError("The dir of saliency maps is empty.")
+
+    # Load paths of saliency maps
+    maps = [f for f in os.listdir(saliency_maps) if os.path.isfile(os.path.join(saliency_maps, f))]
+
+    # Load all saliency maps and accumulate
+    accumulated_map = None
+    for map_path in maps:
+        full_path = f'masks/saliency_maps/{map_path}'
+        saliency_map = nib.load(full_path).get_fdata()
+        if accumulated_map is None:
+            accumulated_map = np.zeros_like(saliency_map)
+        accumulated_map += saliency_map # Sum the maps
+    
+    average_map = accumulated_map / len(saliency_maps)  # Compute the average
+
+    if sigma is not None:
+        average_map = gaussian_filter(average_map, sigma=sigma)  # Apply Gaussian smoothing
+
+    return average_map
+
+
 if __name__ == '__main__':
     '''
     # Compute mapping and save arrays
@@ -146,14 +178,15 @@ if __name__ == '__main__':
     img = nib.load('masks/MVP_rois/HarvardOxford-sub-maxprob-thr50-2mm.nii.gz')
     affine_set = img.affine
     X = np.load('data/X_RAW.npy')
-    example_cope = X[0]  # Take the first training sample
+    example_cope = X[2]  # Take the first training sample
     print(example_cope.shape)
     save_cope_as_nifti(example_cope, affine_set, out_path='masks/example_cope.nii.gz')
 
-    # Print hout what area maps to each index in the Harvard-Oxford atlas
-    data = nilearn.datasets.fetch_atlas_harvard_oxford('cort-maxprob-thr50-2mm')
-    for idx, name in enumerate(data['labels']):
-        print(f"Index {idx}: {name}")
+
+    # Get saliency maps average
+    saliency_maps_dir = 'masks/saliency_maps/'
+    average_map = get_average_saliency_map(saliency_maps_dir, sigma=1.5)
+    save_cope_as_nifti(average_map, affine_set, out_path='masks/average_saliency_map.nii.gz')
     
     
 	

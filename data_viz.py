@@ -181,7 +181,7 @@ if __name__ == '__main__':
     example_cope = X[2]  # Take the first training sample
     print(example_cope.shape)
     save_cope_as_nifti(example_cope, affine_set, out_path='masks/example_cope.nii.gz')
-
+    
 
     # Get saliency maps average
     saliency_maps_dir = 'masks/saliency_maps/'

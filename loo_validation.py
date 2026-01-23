@@ -9,7 +9,7 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import nibabel as nib
 import random
 
-from models import MoodCNNClassifier
+from models import MoodCNNClassifier, CNN3D
 from datasets import COPEDataset
 import datamanager
 
@@ -17,16 +17,14 @@ import datamanager
 if __name__ == "__main__":
 
     # Load the data
-    X, y = datamanager.load_data(cope_type='cope_diff', balanced=True)#, mask_dir='masks/MVP_rois/limbic-thr50-2mm.nii.gz')
+    X, y = datamanager.load_data(cope_type='cope_diff', balanced=True, mask_dir='masks/MVP_rois/outer_brain-thr50-2mm.nii.gz')
     
     # Generate a list of indices from 0 to the length of the lists
     indices = list(range(len(y)))
 
-    # Shuffle the indices
+    # Shuffle the lists
     random.seed(42)  # For reproducibility
     random.shuffle(indices)
-
-    # Create new lists using list comprehensions with the shuffled indices
     X = [X[i] for i in indices]
     y = [y[i] for i in indices]
 
@@ -60,7 +58,7 @@ if __name__ == "__main__":
 
         # Setup
         torch.manual_seed(117)
-        model = MoodCNNClassifier().cuda()
+        model = CNN3D(in_channels=1, num_classes=2).cuda()
         optimizer = optim.RMSprop(model.parameters(), lr=1e-3, weight_decay=1e-5)
         criterion = nn.CrossEntropyLoss()
         num_epochs = 15
@@ -96,7 +94,7 @@ if __name__ == "__main__":
             #input = input.clone().detach().requires_grad_(True)
             output = model(input)
             output = output.softmax(dim=1)
-            pred = torch.argmax(output, dim=1)
+            pred = torch.argmin(output, dim=1)
             print(f"Raw model output: {output.detach().cpu().numpy()}")
             print(f"Predicted class index: {pred.item()}")
             if pred.item() == 1:

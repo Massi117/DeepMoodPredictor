@@ -36,8 +36,8 @@ if __name__ == "__main__":
                         5, 
                         6, 
                         7, 
-                        8, 
-                        #9, 
+                        #8, 
+                        9, 
                         10,
                         11,
                         12,
@@ -47,9 +47,10 @@ if __name__ == "__main__":
                         16, 
                         17, 
                         18, 
-                        #19, 
+                        19, 
                         20, 
-                        21]  # Example label
-    output_mask_path = 'masks/MVP_rois/hippocampus-thr50-2mm.nii.gz'
+                        21,
+                        ]  # Example label
+    output_mask_path = 'masks/MVP_rois/test-thr50-2mm.nii.gz'
     
     extract_label_as_mask(input_nifti_path, label_to_extract, output_mask_path)

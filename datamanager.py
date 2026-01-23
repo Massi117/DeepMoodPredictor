@@ -3,20 +3,26 @@ import numpy as np
 import nibabel as nib
 from sklearn.model_selection import train_test_split
 
-def load_data(cope_type='cope_diff', continuous_labels=False, mask_dir=None):
+def load_data(cope_type='cope_diff', continuous_labels=False, mask_dir=None, balanced=False):
     """Load COPE data for responders and non-responders.
     Args:
         cope_type (str): Type of COPE data to load ('cope_diff' or other).
         continuous_labels (bool): Whether to use continuous MDD change scores as labels.
         mask_dir (str): Path to the mask NIfTI file. If None, no mask is applied.
+        balanced (bool): Whether to balance the classes (not implemented).
     Returns:
         X (np.ndarray): Voxelwise COPE data.
         y (np.ndarray): Labels and MDD change scores."""
+    
+    if balanced:
+        nr_file = 'nonresponder_balanced'
+    else:
+        nr_file = 'nonresponder'
 
     # === Paths & Data ===
     feat_base = '/home/mbosli/DeepMoodPredictor/data/cope_data/forMassi/mumfordadvice'
     subj_lists = {
-        'nonresponder': '/home/mbosli/DeepMoodPredictor/data/grps/nonresponder.txt',
+        'nonresponder': f'/home/mbosli/DeepMoodPredictor/data/grps/{nr_file}.txt',
         'responder': '/home/mbosli/DeepMoodPredictor/data/grps/responder.txt'
     }
     mdd_codes = [11, 13, 17, 18, 21, 24, 31, 29, 32, 35, 37, 28, 43, 60, 46, 51, 61, 63, 62, 65, 

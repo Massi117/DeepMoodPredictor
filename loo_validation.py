@@ -7,6 +7,7 @@ import torch.optim as optim
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import nibabel as nib
+import random
 
 from models import MoodCNNClassifier
 from datasets import COPEDataset
@@ -16,7 +17,19 @@ import datamanager
 if __name__ == "__main__":
 
     # Load the data
-    X, y = datamanager.load_data(cope_type='cope_diff')#, mask_dir='masks/MVP_rois/limbic-thr50-2mm.nii.gz')
+    X, y = datamanager.load_data(cope_type='cope_diff', balanced=True)#, mask_dir='masks/MVP_rois/limbic-thr50-2mm.nii.gz')
+    
+    # Generate a list of indices from 0 to the length of the lists
+    indices = list(range(len(y)))
+
+    # Shuffle the indices
+    random.seed(42)  # For reproducibility
+    random.shuffle(indices)
+
+    # Create new lists using list comprehensions with the shuffled indices
+    X = [X[i] for i in indices]
+    y = [y[i] for i in indices]
+
 
     # Define image affine for saving saliency maps
     img = nib.load('masks/MVP_rois/HarvardOxford-sub-maxprob-thr50-2mm.nii.gz')
@@ -40,16 +53,17 @@ if __name__ == "__main__":
         train_dataset = COPEDataset(X_train, y_train)
         val_dataset = COPEDataset(X_val, y_val)
 
+
         # Define data loaders
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=1, shuffle=False)
         val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=1, shuffle=False)
 
         # Setup
-        torch.manual_seed(42)
+        torch.manual_seed(117)
         model = MoodCNNClassifier().cuda()
-        optimizer = optim.RMSprop(model.parameters(), lr=1e-3)
+        optimizer = optim.RMSprop(model.parameters(), lr=1e-3, weight_decay=1e-5)
         criterion = nn.CrossEntropyLoss()
-        num_epochs = 25
+        num_epochs = 15
 
         # Train
         for epoch in range(num_epochs):
@@ -79,12 +93,24 @@ if __name__ == "__main__":
         model.eval()
         for input, label in val_loader:
             input, label = input.cuda(), label.cuda()
-            input = input.clone().detach().requires_grad_(True)
+            #input = input.clone().detach().requires_grad_(True)
             output = model(input)
-            pred = torch.argmax(outputs, dim=1)
-            actual = torch.argmax(labels, dim=1)
+            output = output.softmax(dim=1)
+            pred = torch.argmax(output, dim=1)
+            print(f"Raw model output: {output.detach().cpu().numpy()}")
+            print(f"Predicted class index: {pred.item()}")
+            if pred.item() == 1:
+                pred_class = 'R'
+            else:
+                pred_class = 'NR'
+            actual = torch.argmax(label, dim=1)
+            if actual.item() == 1:
+                actual_class = 'R'
+            else:
+                actual_class = 'NR'
 
             # Saliency map computation
+            '''
             print("Computing saliency map...")
             score = output[0, actual]
             model.zero_grad()
@@ -96,9 +122,9 @@ if __name__ == "__main__":
             saliency_nifti = nib.Nifti1Image(saliency.numpy(), affine=affine_set)
             nib.save(saliency_nifti, f'masks/saliency_maps/loo_saliency_sample_{i}.nii.gz')
             print("Saliency map saved.")
+            '''
 
-
-            print(f'Predicted: {pred.item()}   True: {actual.item()}')
+            print(f'Predicted: {pred_class}   True: {actual_class}')
             # Update overall lists
             preds_list = np.append(preds_list, pred.item())
             actual_list = np.append(actual_list, actual.item())

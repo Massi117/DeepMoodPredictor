@@ -9,25 +9,40 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import nibabel as nib
 import random
 
-from models import MoodCNNClassifier, CNN3D
+from models import CNN3D
 from datasets import COPEDataset
 import datamanager
 
 
 if __name__ == "__main__":
 
+    # Check for GPU
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using {device} device")
+    try: 
+        name = torch.cuda.get_device_name(0)
+        count = torch.cuda.device_count()
+        print(f"Device count: {count}")
+        print(f"Device name: {name}")
+    except RuntimeError:
+        print('No GPUs detected')
+
+    # Set seed
+    seed = 42
+    torch.manual_seed(seed) # For reproducibility
+    np.random.seed(seed)
+    random.seed(seed)
+
     # Load the data
-    X, y = datamanager.load_data(cope_type='cope_diff', balanced=True, mask_dir='masks/MVP_rois/outer_brain-thr50-2mm.nii.gz')
+    X, y = datamanager.load_data(cope_type='cope_diff', balanced=True)#, mask_dir='masks/MVP_rois/outer_brain-thr50-2mm.nii.gz')
     
     # Generate a list of indices from 0 to the length of the lists
     indices = list(range(len(y)))
 
     # Shuffle the lists
-    random.seed(42)  # For reproducibility
     random.shuffle(indices)
     X = [X[i] for i in indices]
     y = [y[i] for i in indices]
-
 
     # Define image affine for saving saliency maps
     img = nib.load('masks/MVP_rois/HarvardOxford-sub-maxprob-thr50-2mm.nii.gz')
@@ -57,9 +72,8 @@ if __name__ == "__main__":
         val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=1, shuffle=False)
 
         # Setup
-        torch.manual_seed(117)
         model = CNN3D(in_channels=1, num_classes=2).cuda()
-        optimizer = optim.RMSprop(model.parameters(), lr=1e-3, weight_decay=1e-5)
+        optimizer = optim.RMSprop(model.parameters(), lr=1e-4, weight_decay=1e-5)
         criterion = nn.CrossEntropyLoss()
         num_epochs = 15
 
@@ -91,7 +105,7 @@ if __name__ == "__main__":
         model.eval()
         for input, label in val_loader:
             input, label = input.cuda(), label.cuda()
-            #input = input.clone().detach().requires_grad_(True)
+            input = input.clone().detach().requires_grad_(True)
             output = model(input)
             output = output.softmax(dim=1)
             pred = torch.argmin(output, dim=1)
@@ -106,9 +120,8 @@ if __name__ == "__main__":
                 actual_class = 'R'
             else:
                 actual_class = 'NR'
-
+            
             # Saliency map computation
-            '''
             print("Computing saliency map...")
             score = output[0, actual]
             model.zero_grad()
@@ -120,8 +133,7 @@ if __name__ == "__main__":
             saliency_nifti = nib.Nifti1Image(saliency.numpy(), affine=affine_set)
             nib.save(saliency_nifti, f'masks/saliency_maps/loo_saliency_sample_{i}.nii.gz')
             print("Saliency map saved.")
-            '''
-
+            
             print(f'Predicted: {pred_class}   True: {actual_class}')
             # Update overall lists
             preds_list = np.append(preds_list, pred.item())

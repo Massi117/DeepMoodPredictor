@@ -33,7 +33,8 @@ class CNN3D(nn.Module):
             nn.Linear(256, 128),
             nn.ReLU(inplace=True),
             nn.Dropout(p=0.3),
-            nn.Linear(128, num_classes)
+            nn.Linear(128, num_classes),
+            nn.Sigmoid()
         )
 
     def forward(self, x):

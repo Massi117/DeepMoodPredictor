@@ -1,9 +1,10 @@
 import os
 import numpy as np
+import random
 import nibabel as nib
 from sklearn.model_selection import train_test_split
 
-def load_data(cope_type='cope_diff', continuous_labels=False, mask_dir=None, balanced=False):
+def load_data(cope_type='cope_diff', continuous_labels=False, mask_dir=None, balanced=False, seed=42):
     """Load COPE data for responders and non-responders.
     Args:
         cope_type (str): Type of COPE data to load ('cope_diff' or other).
@@ -12,7 +13,9 @@ def load_data(cope_type='cope_diff', continuous_labels=False, mask_dir=None, bal
         balanced (bool): Whether to balance the classes (not implemented).
     Returns:
         X (np.ndarray): Voxelwise COPE data.
-        y (np.ndarray): Labels and MDD change scores."""
+        y (np.ndarray): Labels and MDD change scores.
+        code_list (np.ndarray): List of subject codes.
+    """
     
     if balanced:
         nr_file = 'nonresponder_balanced'
@@ -22,7 +25,7 @@ def load_data(cope_type='cope_diff', continuous_labels=False, mask_dir=None, bal
     # === Paths & Data ===
     feat_base = '/home/mbosli/DeepMoodPredictor/data/cope_data/forMassi/mumfordadvice'
     subj_lists = {
-        'nonresponder': f'/home/mbosli/DeepMoodPredictor/data/grps/{nr_file}.txt',
+        'nonresponder': f'/home/mbosli/DeepMoodPredictor/data/grps/nonresponder.txt',
         'responder': '/home/mbosli/DeepMoodPredictor/data/grps/responder.txt'
     }
     mdd_codes = [11, 13, 17, 18, 21, 24, 31, 29, 32, 35, 37, 28, 43, 60, 46, 51, 61, 63, 62, 65, 
@@ -50,9 +53,13 @@ def load_data(cope_type='cope_diff', continuous_labels=False, mask_dir=None, bal
     subjects = {}
     for group, path in subj_lists.items():
         subjects[group] = load_subjects(path)
+        if balanced and group == 'nonresponder':
+            indices_to_keep = sorted(random.sample(range(len(subjects[group])), len(subjects[group]) - 5))
+            subjects[group] = [subjects[group][i] for i in indices_to_keep]
+        print(subjects[group])
 
     # === Extract voxelwise COPE values ===
-    X, y = [], []
+    X, y, code_list = [], [], []
 
     for group, codes in subjects.items():
         label = 1 if group == 'responder' else 0
@@ -73,12 +80,14 @@ def load_data(cope_type='cope_diff', continuous_labels=False, mask_dir=None, bal
                 X.append(voxels)
                 mdd_change = mdd_wr[idx] - mdd_sd[idx]
                 y.append([label, mdd_change])
+                code_list.append(code)
             except Exception as e:
                 print(f"Error loading {cope_path}: {e}")
 
     # Transform to np arrays
     X = np.array(X)
     y = np.array(y)
+    code_list = np.array(code_list)
 
     # Split y into classification and regression parts
     y_class = np.array([])
@@ -98,7 +107,7 @@ def load_data(cope_type='cope_diff', continuous_labels=False, mask_dir=None, bal
 
     print(f"Loaded {len(X)} binary samples (NR vs R). Feature shape: {X.shape}")
 
-    return X, y
+    return X, y, code_list
 
 def create_train_test_split(X, y, test_size=0.1, random_state=None):
     """Split the data into training and testing sets.
@@ -130,7 +139,7 @@ def create_train_test_split(X, y, test_size=0.1, random_state=None):
 if __name__ == '__main__':
 
     # Load the data
-    X, y = load_data(cope_type='cope_diff', mask_dir='masks/MVP_rois/MNI-maxprob-thr0-2mm.nii.gz')
+    X, y, _ = load_data(cope_type='cope_diff', balanced=True)
 
     # Create train-test split
     print("Creating train-test split...")

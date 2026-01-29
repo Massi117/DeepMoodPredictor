@@ -31,18 +31,29 @@ if __name__ == "__main__":
         print('No GPUs detected')
 
     # Check and set random seeds
-    if len(sys.argv) > 1:
-        seed = int(sys.argv[1])
-    else:
+    if len(sys.argv) == 1:      # no arguments
         seed = 0
+        mask_path = None
+        save_file = ''
+    elif len(sys.argv) == 2:    # one argument
+        seed = int(sys.argv[1])
+        mask_path = None
+        save_file = ''
+    elif len(sys.argv) == 3:    # two arguments
+        seed = int(sys.argv[1])
+        mask_path = sys.argv[2]
+        save_file = mask_path.replace('-mask.nii.gz', '')
+        save_file = save_file.replace('masks/MVP_rois/', '')
 
     print(f"Using random seed: {seed}")
+    print(f'Using mask path: {mask_path}')
+
     torch.manual_seed(seed) # For reproducibility
     np.random.seed(seed)
     random.seed(seed)
 
     # Load the data
-    X, y, code_list = datamanager.load_data(cope_type='cope_diff', balanced=True, seed=seed)#, mask_dir='masks/MVP_rois/amygdala-thr50-2mm.nii.gz')
+    X, y, code_list = datamanager.load_data(cope_type='cope_diff', balanced=True, seed=seed, mask_dir=mask_path)
     
     # Generate a list of indices from 0 to the length of the lists
     indices = list(range(len(y)))
@@ -60,7 +71,7 @@ if __name__ == "__main__":
     # Determine number of folds
     folds = len(y)
     print(f"Performing LOO validation on {folds} samples...")
-
+    
     # Start LOO validation
     preds_list = np.array([])
     actual_list = np.array([])
@@ -117,6 +128,7 @@ if __name__ == "__main__":
             #input = input.clone().detach().requires_grad_(True)
             output = model(input)
             pred = torch.round(output)
+            pred = 1 - pred.item()
             
             '''
             # Saliency map computation
@@ -134,9 +146,9 @@ if __name__ == "__main__":
             '''
 
             print(f"Raw model output: {output.detach().cpu().numpy()}")
-            print(f'Predicted: {pred.item()}   True: {label.item()}')
+            print(f'Predicted: {pred}   True: {label.item()}')
             # Update overall lists
-            preds_list = np.append(preds_list, pred.item())
+            preds_list = np.append(preds_list, pred)
             actual_list = np.append(actual_list, label.item())
 
         print('LOO iteration complete.\n')
@@ -146,16 +158,18 @@ if __name__ == "__main__":
     print("Calculating overall validation accuracy...")
     val_acc = np.sum(preds_list == actual_list) / len(actual_list)
     print(f"Validation Accuracy: {val_acc:.4f}")
+    
 
     # Append results to CSV
     new_row_values = [seed, val_acc]
-    with open('data/accuracies.csv', 'a', newline='') as csvfile:
+    with open(f'data/accuracies_{save_file}.csv', 'a', newline='') as csvfile:
         writer = csv.writer(csvfile)
         # Write the new list of values as a single row
         writer.writerow(new_row_values)
-
+    '''
     cm = confusion_matrix(actual_list, preds_list)
     matrix = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['NR', 'R'])
     plt.title("Confusion Matrix")
     matrix.plot(cmap=plt.cm.Blues).figure_.savefig("figures/loo_confusion_matrix.png")
     plt.close()
+    '''

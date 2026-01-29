@@ -7,6 +7,9 @@ env/
 # Ignore masks
 *.nii.gz
 
+# Ignore output files
+*.out
+
 # Ignore cache
 __pycache__/
 

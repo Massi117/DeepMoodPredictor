@@ -1,0 +1,9 @@
+import nibabel as nib
+
+#mask = 'masks/MVP_rois/HarvardOxford-sub-maxprob-thr50-2mm.nii.gz' 
+mask = 'masks/MVP_rois/desikanKillianyMNI.nii.gz'
+
+img = nib.load(mask)
+header_info = img.header
+print(header_info)
+print(f'mm per pixel: {img.header.get_zooms()}')

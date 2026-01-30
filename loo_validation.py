@@ -11,6 +11,7 @@ import nibabel as nib
 import random
 import sys
 import csv
+import time
 
 from models import CNN3D
 from datasets import COPEDataset
@@ -18,6 +19,9 @@ import datamanager
 
 
 if __name__ == "__main__":
+
+    # Start Timer
+    start_time = time.perf_counter()
 
     # Check for GPU
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -34,7 +38,7 @@ if __name__ == "__main__":
     if len(sys.argv) == 1:      # no arguments
         seed = 0
         mask_path = None
-        save_file = ''
+        save_file = 'test'
     elif len(sys.argv) == 2:    # one argument
         seed = int(sys.argv[1])
         mask_path = None
@@ -88,13 +92,21 @@ if __name__ == "__main__":
 
 
         # Define data loaders
-        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=1, shuffle=False)
-        val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=1, shuffle=False)
+        train_loader = torch.utils.data.DataLoader(
+            train_dataset,
+            batch_size=1,
+            shuffle=False
+        )
+        val_loader = torch.utils.data.DataLoader(
+            val_dataset,
+            batch_size=1,
+            shuffle=False
+        )
 
         # Setup
         model = CNN3D(in_channels=1, num_classes=1).cuda()
-        optimizer = optim.RMSprop(model.parameters(), lr=1e-5)#, weight_decay=1e-5)
-        criterion = nn.BCELoss()
+        optimizer = optim.RMSprop(model.parameters(), lr=1e-5)
+        criterion = nn.BCEWithLogitsLoss()
         num_epochs = 15
 
         # Train
@@ -102,18 +114,24 @@ if __name__ == "__main__":
             model.train()
             total_loss, correct = 0.0, 0
 
+            scaler = torch.amp.GradScaler('cuda')
+
             for batch in train_loader:
                 inputs, labels = batch
-                inputs, labels = inputs.cuda(), labels.cuda()
+                inputs, labels = inputs.cuda(non_blocking=True), labels.cuda(non_blocking=True)
 
                 optimizer.zero_grad()
-                outputs = model(inputs)
-                loss = criterion(outputs, labels)
-                loss.backward()
-                optimizer.step()
+                with torch.amp.autocast('cuda'):
+                    logits = model(inputs)
+                    loss = criterion(logits, labels)
+                
+                scaler.scale(loss).backward()
+                scaler.step(optimizer)
+                scaler.update()
 
-                total_loss += loss.item()
-                preds = torch.round(outputs)
+                total_loss += loss.detach()
+                probs = torch.sigmoid(logits)                
+                preds = torch.round(probs)
                 correct += (preds == labels).sum().item()
 
             acc = correct / len(train_loader.dataset)
@@ -126,8 +144,9 @@ if __name__ == "__main__":
         for input, label in val_loader:
             input, label = input.cuda(), label.cuda()
             #input = input.clone().detach().requires_grad_(True)
-            output = model(input)
-            pred = torch.round(output)
+            logit = model(input)
+            prob = torch.sigmoid(logit)                
+            pred = torch.round(prob)
             pred = 1 - pred.item()
             
             '''
@@ -145,7 +164,7 @@ if __name__ == "__main__":
             print("Saliency map saved.")
             '''
 
-            print(f"Raw model output: {output.detach().cpu().numpy()}")
+            print(f"Raw model output: {prob.detach().cpu().numpy()}")
             print(f'Predicted: {pred}   True: {label.item()}')
             # Update overall lists
             preds_list = np.append(preds_list, pred)
@@ -173,3 +192,9 @@ if __name__ == "__main__":
     matrix.plot(cmap=plt.cm.Blues).figure_.savefig("figures/loo_confusion_matrix.png")
     plt.close()
     '''
+
+    # Script runtime
+    end_time = time.perf_counter()
+    elapsed_time = end_time - start_time
+
+    print(f"Script execution time: {elapsed_time:.4f} seconds")

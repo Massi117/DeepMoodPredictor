@@ -108,7 +108,8 @@ if __name__ == "__main__":
         )
 
         # Setup
-        model = CNN3D(in_channels=1, num_classes=1).cuda()
+        torch.set_float32_matmul_precision('high')
+        model = torch.compile(CNN3D(in_channels=1, num_classes=1)).cuda()
         optimizer = optim.RMSprop(model.parameters(), lr=1e-5)
         criterion = nn.BCEWithLogitsLoss()
         num_epochs = 15
@@ -148,7 +149,8 @@ if __name__ == "__main__":
         for input, label in val_loader:
             input, label = input.cuda(), label.cuda()
             #input = input.clone().detach().requires_grad_(True)
-            logit = model(input)
+            with torch.no_grad():
+                logit = model(input)
             prob = torch.sigmoid(logit)                
             pred = torch.round(prob)
             pred = 1 - pred.item()

@@ -95,7 +95,11 @@ if __name__ == "__main__":
         train_loader = torch.utils.data.DataLoader(
             train_dataset,
             batch_size=1,
-            shuffle=False
+            shuffle=False,
+            num_workers=4,
+            pin_memory=True,
+            persistent_workers=True,
+            prefetch_factor=2
         )
         val_loader = torch.utils.data.DataLoader(
             val_dataset,

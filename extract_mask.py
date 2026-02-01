@@ -43,10 +43,10 @@ if __name__ == "__main__":
     idx = list(columns[1])
     idx = [int(i) for i in idx]
 
-    filename = 'thalamus'
+    filename = 'hippocampus'
     regions_of_interest = [
-        'Right-Thalamus-Proper',
-        'Left-Thalamus-Proper'
+        'Left-Hippocampus',
+        'Right-Hippocampus'
     ]
 
 

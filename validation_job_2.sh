@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # Job Flags
-#SBATCH --job-name=thalamus_validation
+#SBATCH --job-name=Cerebellum_validation
 #SBATCH -p mit_normal_gpu
+#SBATCH -n 8
 #SBATCH --gres=gpu:1
 #SBATCH --time=06:00:00
 
@@ -13,5 +14,5 @@ source /home/mbosli/DeepMoodPredictor/env/bin/activate
 # Run the application
 for i in {0..99}
 do
-    python loo_validation.py $i 'masks/MVP_rois/thalamus-mask.nii.gz'
+    python loo_validation.py $i 'masks/MVP_rois/Cerebellum-mask.nii.gz'
 done

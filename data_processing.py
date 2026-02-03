@@ -4,6 +4,8 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import datamanager
+from scipy.stats import zscore
 
 def nullify_background(data, bg_value=0):
     """Set background voxels to zero.
@@ -63,19 +65,19 @@ def plot_cope_histogram(cope_data, save_path='figures/cope_histogram.png', bins=
 # Driver
 if __name__ == '__main__':
 
-    # Load data
-    X = np.load('data/X_TRAIN_RAW.npy')
-    y = np.load('data/y_TRAIN_RAW.npy')
-    print(f"Loaded data shapes: X={X.shape}, y={y.shape}")
+    # Load the data
+    X, y, _ = datamanager.load_data(cope_type='cope_diff', balanced=True)
 
     # Example usage
-    subject = nullify_background(X[0])  # First subject
-    label = y[0]
+    subject = X[1]  # First subject
+    subjectz = zscore(X[1])  # Z-scored first subject
+    label = y[1]
     print(f"Subject label: {label}")
     print(f'Subject mean COPE value (non-bg): {np.nanmean(subject)}')
     plot_cope_histogram(subject, save_path='figures/cope_histogram.png', bins=500)
+    plot_cope_histogram(subjectz, save_path='figures/cope_histogram_z.png', bins=500)
     print("Saved COPE data plot to figures/cope_histogram.png")
-
+    '''
     # Example usage
     subject = nullify_background(X[1])  # First subject
     label = y[1]
@@ -112,3 +114,4 @@ if __name__ == '__main__':
     plt.savefig('figures/mean_cope_comparison.png', dpi=150)
     plt.close()
     print("Saved mean COPE comparison plot to figures/mean_cope_comparison.png")
+    '''

@@ -57,7 +57,7 @@ if __name__ == "__main__":
     random.seed(seed)
 
     # Load the data
-    cope = 'cope1'
+    cope = 'cope_diff'
     X, y, code_list = datamanager.load_data(cope_type=cope, balanced=True, seed=seed, mask_dir=mask_path)
     
     # Generate a list of indices from 0 to the length of the lists
@@ -187,7 +187,7 @@ if __name__ == "__main__":
     
 
     # Append results to CSV
-    new_row_values = [seed, val_acc]
+    new_row_values = [seed, val_acc, preds_list, actual_list, code_list]
     with open(f'data/accuracies/{cope}/accuracies_{save_file}.csv', 'a', newline='') as csvfile:
         writer = csv.writer(csvfile)
         # Write the new list of values as a single row

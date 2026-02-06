@@ -14,7 +14,8 @@ region_accuracy = {
     18: 0.7626,
     15: 0.7626,
     1009: 1.0,
-    1008: 0,
+    1008: 0.0,
+    1015: 1.0
 }
 
 accuracy_map = np.zeros_like(atlas_data)
@@ -56,6 +57,4 @@ display = plotting.plot_surf_stat_map(
 )
 
 display.savefig("figures/model_accuracy_map.png", dpi=300)
-print('hello')
 plotting.show()
-#display.close()

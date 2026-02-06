@@ -43,10 +43,10 @@ if __name__ == "__main__":
     idx = list(columns[1])
     idx = [int(i) for i in idx]
 
-    filename = 'hippocampus'
+    filename = 'V1_pericalcarine'
     regions_of_interest = [
-        'Left-Hippocampus',
-        'Right-Hippocampus'
+        'ctx-lh-pericalcarine',
+        'ctx-rh-pericalcarine'
     ]
 
 
